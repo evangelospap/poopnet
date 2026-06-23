@@ -43,3 +43,6 @@ next-env.d.ts
 # java / spring boot
 backend/app/target/
 backend/app/data/
+
+backend/doc/*.svg
+backend/doc/*.png
