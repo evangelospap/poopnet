@@ -1,0 +1,132 @@
+@startuml
+title Poop Vibe Database Schema
+
+hide circle
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+entity "users" as users {
+  * id : bigint <<PK>>
+  --
+  * auth_provider_id : varchar(120) <<UK>>
+  * username : varchar(40) <<UK>>
+  * email : varchar(160) <<UK>>
+  profile_pic_url : varchar(500)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "poop_sessions" as poop_sessions {
+  * id : bigint <<PK>>
+  --
+  * client_id : uuid <<UK>>
+  * user_id : bigint <<FK>>
+  * start_time : timestamptz
+  * end_time : timestamptz
+  * duration_seconds : bigint
+  * mood : varchar(20)
+  * comfort_level : varchar(20)
+  * privacy : varchar(20)
+  note : varchar(1000)
+  * synced_from_offline : boolean
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "session_comments" as session_comments {
+  * id : bigint <<PK>>
+  --
+  * session_id : bigint <<FK>>
+  * user_id : bigint <<FK>>
+  * body : varchar(500)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "session_reactions" as session_reactions {
+  * id : bigint <<PK>>
+  --
+  * session_id : bigint <<FK>>
+  * user_id : bigint <<FK>>
+  * emoji : varchar(12)
+  * created_at : timestamptz
+  --
+  UK session_id, user_id
+}
+
+entity "session_media" as session_media {
+  * id : bigint <<PK>>
+  --
+  * session_id : bigint <<FK>>
+  * media_url : varchar(500)
+  * media_type : varchar(20)
+  * created_at : timestamptz
+}
+
+entity "friendships" as friendships {
+  * id : bigint <<PK>>
+  --
+  * requester_id : bigint <<FK>>
+  * addressee_id : bigint <<FK>>
+  * status : varchar(20)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+  --
+  UK requester_id, addressee_id
+}
+
+entity "devices" as devices {
+  * id : bigint <<PK>>
+  --
+  * user_id : bigint <<FK>>
+  * fcm_token : varchar(512) <<UK>>
+  * app : varchar(20)
+  * push_enabled : boolean
+  * last_seen_at : timestamptz
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "activity_logs" as activity_logs {
+  * id : bigint <<PK>>
+  --
+  actor_user_id : bigint
+  * type : varchar(40)
+  * target_type : varchar(80)
+  target_id : bigint
+  details : varchar(1000)
+  * created_at : timestamptz
+}
+
+users ||--o{ poop_sessions : owns
+users ||--o{ session_comments : writes
+users ||--o{ session_reactions : reacts
+users ||--o{ friendships : requester
+users ||--o{ friendships : addressee
+users ||--o{ devices : registers
+users ||..o{ activity_logs : actor_user_id
+
+poop_sessions ||--o{ session_comments : has
+poop_sessions ||--o{ session_reactions : has
+poop_sessions ||--o{ session_media : has
+
+note right of poop_sessions
+  mood values: LIGHT, STEADY, SPICY, ROUGH
+  comfort_level values: GREAT, OKAY, UNCOMFORTABLE
+  privacy values: PRIVATE, FRIENDS, PUBLIC
+end note
+
+note right of friendships
+  status values: PENDING, ACCEPTED, REJECTED, BLOCKED
+end note
+
+note right of devices
+  app values: WEB, IOS, ANDROID, DESKTOP
+end note
+
+note right of activity_logs
+  type stores ActivityType enum values for domain events.
+  actor_user_id is stored without an FK constraint.
+end note
+
+@enduml
