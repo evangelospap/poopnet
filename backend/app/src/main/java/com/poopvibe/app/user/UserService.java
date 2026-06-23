@@ -51,7 +51,7 @@ public class UserService {
                 request.profilePicUrl()
         ));
         userCreatedCounter.increment();
-        activityLogService.record(user.getId(), ActivityType.USER_CREATED, "user", user.getId(), user.getUsername());
+        activityLogService.recordActivity(user.getId(), ActivityType.USER_CREATED, "user", user.getId(), user.getUsername());
         return UserResponse.from(user);
     }
 
@@ -66,7 +66,7 @@ public class UserService {
     public UserResponse update(Long userId, UpdateUserRequest request) {
         User user = findEntity(userId);
         user.updateProfile(request.username(), request.email(), request.profilePicUrl());
-        activityLogService.record(user.getId(), ActivityType.USER_UPDATED, "user", user.getId(), user.getUsername());
+        activityLogService.recordActivity(user.getId(), ActivityType.USER_UPDATED, "user", user.getId(), user.getUsername());
         return UserResponse.from(user);
     }
 

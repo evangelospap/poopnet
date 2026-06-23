@@ -104,7 +104,7 @@ public class SessionService {
 
         PoopSession saved = sessionRepository.save(session);
         sessionCreatedCounter.increment();
-        activityLogService.record(user.getId(), ActivityType.SESSION_CREATED, "session", saved.getId(), saved.getMood().name());
+        activityLogService.recordActivity(user.getId(), ActivityType.SESSION_CREATED, "session", saved.getId(), saved.getMood().name());
         return toResponse(saved);
     }
 
@@ -132,7 +132,7 @@ public class SessionService {
                 request.note(),
                 request.syncedFromOffline()
         );
-        activityLogService.record(request.userId(), ActivityType.SESSION_UPDATED, "session", session.getId(), session.getMood().name());
+        activityLogService.recordActivity(request.userId(), ActivityType.SESSION_UPDATED, "session", session.getId(), session.getMood().name());
         return toResponse(session);
     }
 
@@ -146,7 +146,7 @@ public class SessionService {
         PoopSession session = findEntity(sessionId);
         Long userId = session.getUser().getId();
         sessionRepository.delete(session);
-        activityLogService.record(userId, ActivityType.SESSION_DELETED, "session", sessionId, "deleted");
+        activityLogService.recordActivity(userId, ActivityType.SESSION_DELETED, "session", sessionId, "deleted");
     }
 
     /**
@@ -190,7 +190,7 @@ public class SessionService {
                 })
                 .orElseGet(() -> new SessionReaction(session, user, request.emoji()));
         SessionReaction saved = reactionRepository.save(reaction);
-        activityLogService.record(user.getId(), ActivityType.REACTION_ADDED, "session", sessionId, request.emoji());
+        activityLogService.recordActivity(user.getId(), ActivityType.REACTION_ADDED, "session", sessionId, request.emoji());
         return ReactionResponse.from(saved);
     }
 
@@ -206,7 +206,7 @@ public class SessionService {
         PoopSession session = findEntity(sessionId);
         User user = userService.findEntity(request.userId());
         SessionComment saved = commentRepository.save(new SessionComment(session, user, request.body()));
-        activityLogService.record(user.getId(), ActivityType.COMMENT_ADDED, "session", sessionId, request.body());
+        activityLogService.recordActivity(user.getId(), ActivityType.COMMENT_ADDED, "session", sessionId, request.body());
         return CommentResponse.from(saved);
     }
 
@@ -220,6 +220,7 @@ public class SessionService {
     @Transactional
     public MediaResponse addMedia(Long sessionId, AddMediaRequest request) {
         PoopSession session = findEntity(sessionId);
+        activityLogService.recordActivity(session.getUser().getId(), ActivityType.MEDIA_ADDED, "session", sessionId, request.mediaUrl());
         SessionMedia saved = mediaRepository.save(new SessionMedia(session, request.mediaUrl(), request.mediaType()));
         return MediaResponse.from(saved);
     }

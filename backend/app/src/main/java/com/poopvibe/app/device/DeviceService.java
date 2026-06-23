@@ -7,6 +7,7 @@ import com.poopvibe.app.device.DeviceDtos.RegisterDeviceRequest;
 import com.poopvibe.app.user.User;
 import com.poopvibe.app.user.UserService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,23 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
  * Handles idempotent device and push-token registration.
  */
 @Service
+@RequiredArgsConstructor
 public class DeviceService {
     private final DeviceRepository repository;
     private final UserService userService;
     private final ActivityLogService activityLogService;
-
-    /**
-     * Creates the device service.
-     *
-     * @param repository device repository
-     * @param userService user lookup service
-     * @param activityLogService activity logger
-     */
-    public DeviceService(DeviceRepository repository, UserService userService, ActivityLogService activityLogService) {
-        this.repository = repository;
-        this.userService = userService;
-        this.activityLogService = activityLogService;
-    }
 
     /**
      * Registers a device token or refreshes the existing token row.
@@ -48,7 +37,7 @@ public class DeviceService {
                 })
                 .orElseGet(() -> new Device(user, request.fcmToken(), request.app(), request.pushEnabled()));
         Device saved = repository.save(device);
-        activityLogService.record(user.getId(), ActivityType.DEVICE_REGISTERED, "device", saved.getId(), saved.getapp().name());
+        activityLogService.recordActivity(user.getId(), ActivityType.DEVICE_REGISTERED, "device", saved.getId(), saved.getapp().name());
         return DeviceResponse.from(saved);
     }
 

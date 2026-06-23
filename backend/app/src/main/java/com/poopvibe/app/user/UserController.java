@@ -6,6 +6,7 @@ import com.poopvibe.app.user.UserDtos.UserResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,17 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
 public class UserController {
     private final UserService service;
-
-    /**
-     * Creates the user controller.
-     *
-     * @param service user service
-     */
-    public UserController(UserService service) {
-        this.service = service;
-    }
 
     /**
      * Creates a user profile.

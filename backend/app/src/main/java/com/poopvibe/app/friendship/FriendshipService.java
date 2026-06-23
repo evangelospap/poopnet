@@ -10,6 +10,7 @@ import com.poopvibe.app.friendship.FriendshipDtos.UpdateFriendshipRequest;
 import com.poopvibe.app.user.User;
 import com.poopvibe.app.user.UserService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,27 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
  * Manages friend requests and relationship status transitions.
  */
 @Service
+@RequiredArgsConstructor
 public class FriendshipService {
     private final FriendshipRepository repository;
     private final UserService userService;
     private final ActivityLogService activityLogService;
-
-    /**
-     * Creates the friendship service.
-     *
-     * @param repository friendship repository
-     * @param userService user lookup service
-     * @param activityLogService activity logger
-     */
-    public FriendshipService(
-            FriendshipRepository repository,
-            UserService userService,
-            ActivityLogService activityLogService
-    ) {
-        this.repository = repository;
-        this.userService = userService;
-        this.activityLogService = activityLogService;
-    }
 
     /**
      * Creates a pending friend request.
@@ -58,7 +43,7 @@ public class FriendshipService {
         User requester = userService.findEntity(request.requesterId());
         User addressee = userService.findEntity(request.addresseeId());
         Friendship friendship = repository.save(new Friendship(requester, addressee));
-        activityLogService.record(requester.getId(), ActivityType.FRIEND_REQUESTED, "friendship", friendship.getId(), addressee.getUsername());
+        activityLogService.recordActivity(requester.getId(), ActivityType.FRIEND_REQUESTED, "friendship", friendship.getId(), addressee.getUsername());
         return FriendshipResponse.from(friendship);
     }
 
@@ -73,7 +58,7 @@ public class FriendshipService {
     public FriendshipResponse update(Long friendshipId, UpdateFriendshipRequest request) {
         Friendship friendship = findEntity(friendshipId);
         friendship.updateStatus(request.status());
-        activityLogService.record(
+        activityLogService.recordActivity(
                 friendship.getRequester().getId(),
                 ActivityType.FRIENDSHIP_UPDATED,
                 "friendship",

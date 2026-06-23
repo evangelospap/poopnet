@@ -5,6 +5,7 @@ import com.poopvibe.app.device.DeviceDtos.RegisterDeviceRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,17 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/devices")
+@RequiredArgsConstructor
 public class DeviceController {
     private final DeviceService service;
-
-    /**
-     * Creates the device controller.
-     *
-     * @param service device service
-     */
-    public DeviceController(DeviceService service) {
-        this.service = service;
-    }
 
     /**
      * Registers or refreshes a device token.

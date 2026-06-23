@@ -2,6 +2,7 @@ package com.poopvibe.app.feed;
 
 import com.poopvibe.app.feed.FeedDtos.FeedItemResponse;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,17 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/feed")
+@RequiredArgsConstructor
 public class FeedController {
     private final FeedService service;
-
-    /**
-     * Creates the feed controller.
-     *
-     * @param service feed service
-     */
-    public FeedController(FeedService service) {
-        this.service = service;
-    }
 
     /**
      * Returns the viewer's activity feed.

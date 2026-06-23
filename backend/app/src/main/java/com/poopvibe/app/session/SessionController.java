@@ -11,6 +11,7 @@ import com.poopvibe.app.session.SessionDtos.UpsertSessionRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,17 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/poop-sessions")
+@RequiredArgsConstructor
 public class SessionController {
     private final SessionService service;
-
-    /**
-     * Creates the session controller.
-     *
-     * @param service session service
-     */
-    public SessionController(SessionService service) {
-        this.service = service;
-    }
 
     /**
      * Creates or syncs a session.

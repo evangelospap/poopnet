@@ -2,6 +2,7 @@ package com.poopvibe.app.activity;
 
 import com.poopvibe.app.activity.ActivityLogDtos.ActivityLogResponse;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,17 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/activity-logs")
+@RequiredArgsConstructor
 public class ActivityLogController {
     private final ActivityLogService service;
-
-    /**
-     * Creates the activity log controller.
-     *
-     * @param service activity log service
-     */
-    public ActivityLogController(ActivityLogService service) {
-        this.service = service;
-    }
 
     /**
      * Returns recent activity created by an actor.

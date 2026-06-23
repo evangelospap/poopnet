@@ -15,6 +15,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,20 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
  * Produces lightweight session aggregates for dashboards and charts.
  */
 @Service
+@RequiredArgsConstructor
 public class StatsService {
     private final PoopSessionRepository sessionRepository;
     private final UserService userService;
-
-    /**
-     * Creates the stats service.
-     *
-     * @param sessionRepository session repository
-     * @param userService user lookup service
-     */
-    public StatsService(PoopSessionRepository sessionRepository, UserService userService) {
-        this.sessionRepository = sessionRepository;
-        this.userService = userService;
-    }
 
     /**
      * Calculates summary stats for a user over a date range.

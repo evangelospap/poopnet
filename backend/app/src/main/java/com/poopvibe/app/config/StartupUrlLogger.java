@@ -2,6 +2,7 @@ package com.poopvibe.app.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -14,22 +15,12 @@ import org.springframework.stereotype.Component;
  * Logs the URLs that can be used to open the Poop Vibe backend after startup.
  */
 @Component
+@RequiredArgsConstructor
 public class StartupUrlLogger implements ApplicationListener<ApplicationReadyEvent> {
     private static final Logger log = LoggerFactory.getLogger(StartupUrlLogger.class);
 
     private final WebServerApplicationContext context;
     private final Environment environment;
-
-    /**
-     * Creates a startup logger with access to the bound web server and runtime environment.
-     *
-     * @param context running web server context
-     * @param environment resolved application configuration
-     */
-    public StartupUrlLogger(WebServerApplicationContext context, Environment environment) {
-        this.context = context;
-        this.environment = environment;
-    }
 
     /**
      * Logs the local and configured public backend URLs once the web server is ready.

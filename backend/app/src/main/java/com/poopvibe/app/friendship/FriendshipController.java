@@ -6,6 +6,7 @@ import com.poopvibe.app.friendship.FriendshipDtos.UpdateFriendshipRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,17 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/friendships")
+@RequiredArgsConstructor
 public class FriendshipController {
     private final FriendshipService service;
-
-    /**
-     * Creates the friendship controller.
-     *
-     * @param service friendship service
-     */
-    public FriendshipController(FriendshipService service) {
-        this.service = service;
-    }
 
     /**
      * Creates a pending friend request.

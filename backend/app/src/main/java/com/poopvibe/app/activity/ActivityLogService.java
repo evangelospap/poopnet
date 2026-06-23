@@ -38,7 +38,7 @@ public class ActivityLogService {
      * @param details short details for operators
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void record(Long actorUserId, ActivityType type, String targetType, Long targetId, String details) {
+    public void recordActivity(Long actorUserId, ActivityType type, String targetType, Long targetId, String details) {
         repository.save(new ActivityLog(actorUserId, type, targetType, targetId, details));
         activityCounter.increment();
     }

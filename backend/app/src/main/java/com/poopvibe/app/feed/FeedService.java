@@ -12,6 +12,7 @@ import com.poopvibe.app.user.UserService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,35 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
  * Builds privacy-aware activity feed read models.
  */
 @Service
+@RequiredArgsConstructor
 public class FeedService {
     private final PoopSessionRepository sessionRepository;
     private final SessionReactionRepository reactionRepository;
     private final SessionCommentRepository commentRepository;
     private final FriendshipService friendshipService;
     private final UserService userService;
-
-    /**
-     * Creates the feed service.
-     *
-     * @param sessionRepository session repository
-     * @param reactionRepository reaction repository
-     * @param commentRepository comment repository
-     * @param friendshipService friendship lookup service
-     * @param userService user lookup service
-     */
-    public FeedService(
-            PoopSessionRepository sessionRepository,
-            SessionReactionRepository reactionRepository,
-            SessionCommentRepository commentRepository,
-            FriendshipService friendshipService,
-            UserService userService
-    ) {
-        this.sessionRepository = sessionRepository;
-        this.reactionRepository = reactionRepository;
-        this.commentRepository = commentRepository;
-        this.friendshipService = friendshipService;
-        this.userService = userService;
-    }
 
     /**
      * Returns the current user's feed using accepted friendships and session privacy.

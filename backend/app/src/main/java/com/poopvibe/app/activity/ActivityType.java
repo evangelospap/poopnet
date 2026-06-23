@@ -13,5 +13,6 @@ public enum ActivityType {
     SESSION_UPDATED,
     SESSION_DELETED,
     REACTION_ADDED,
-    COMMENT_ADDED
+    COMMENT_ADDED,
+    MEDIA_ADDED
 }
