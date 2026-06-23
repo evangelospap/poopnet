@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import Link from "next/link";
 
 import type { DashboardTheme } from "../theme";
 import type { ThemeMode } from "../types";
@@ -63,16 +64,15 @@ export function AppHeader({
               />
             ) : null}
           </button>
-          <button
+          <Link
+            href="/profile"
             className={`grid size-9 place-items-center overflow-hidden rounded-lg border text-xs font-black transition active:scale-95 ${theme.avatar}`}
             aria-label="Open profile"
-            type="button"
           >
             EP
-          </button>
+          </Link>
         </div>
       </div>
     </header>
   );
 }
-

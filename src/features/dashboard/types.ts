@@ -21,6 +21,5 @@ export type StatCard = {
 export type NavItem = {
   label: string;
   icon: string;
-  active: boolean;
+  href: string;
 };
-

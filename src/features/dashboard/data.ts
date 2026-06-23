@@ -36,9 +36,8 @@ export const statCards: StatCard[] = [
 ];
 
 export const navItems: NavItem[] = [
-  { label: "Dashboard", icon: "▦", active: true },
-  { label: "Friends", icon: "👥", active: false },
-  { label: "Stats", icon: "◫", active: false },
-  { label: "Profile", icon: "◉", active: false },
+  { label: "Dashboard", icon: "▦", href: "/" },
+  { label: "Friends", icon: "👥", href: "/friends" },
+  { label: "Stats", icon: "◫", href: "/stats" },
+  { label: "Profile", icon: "◉", href: "/profile" },
 ];
-
