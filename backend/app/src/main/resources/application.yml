@@ -1,15 +1,16 @@
 spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+      - optional:file:../../.env[.properties]
   application:
     name: poop-vibe-app
   datasource:
-    url: jdbc:h2:file:./data/poop-vibe;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:54330/poop_vibes}
+    driver-class-name: org.postgresql.Driver
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
   flyway:
     baseline-on-migrate: true
   jpa:
@@ -46,6 +47,6 @@ app:
   public-host: ${APP_PUBLIC_HOST:}
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /

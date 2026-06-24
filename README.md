@@ -18,7 +18,7 @@ The app is split into two local applications:
 - `src/` - Next.js 16 and React 19 frontend for the PWA-style dashboard, friends, stats, and profile screens.
 - `backend/app/` - Java 25 and Spring Boot 4 API for persistence, business rules, metrics, and local development data.
 
-The frontend currently uses local UI state and shared dashboard components. The backend exposes the domain API and stores development data in an H2 database under `backend/app/data/`.
+The frontend currently uses local UI state and shared dashboard components. The backend exposes the domain API and stores development data in PostgreSQL.
 
 ## Main Screens
 
@@ -43,14 +43,15 @@ The frontend currently uses local UI state and shared dashboard components. The 
 Run both apps from the project root:
 
 ```bash
+cp .env.example .env
+docker compose up -d postgres
 npm run dev:all
 ```
 
 This starts:
 
-- Frontend: `http://localhost:3000`
+- Frontend: `http://localhost:3001`
 - Backend: `http://localhost:8080`
-- H2 console: `http://localhost:8080/h2-console`
 - Actuator health: `http://localhost:8080/actuator/health`
 
 The combined runner prefixes logs with `[frontend]` and `[backend]` and stops both processes when you press `Ctrl+C`. The backend logs its resolved URL at startup, for example `Poop Vibe backend served at http://localhost:8080`. Set `APP_PUBLIC_HOST` to also log a LAN or public hostname.
@@ -63,10 +64,22 @@ Frontend only:
 npm run dev
 ```
 
+To use another frontend port:
+
+```bash
+FRONTEND_PORT=3002 npm run dev
+```
+
 Backend only:
 
 ```bash
 npm run dev:backend
+```
+
+Database only:
+
+```bash
+docker compose up -d postgres
 ```
 
 Backend compile check:
@@ -76,12 +89,13 @@ cd backend/app
 JAVA_TOOL_OPTIONS=-Djdk.attach.allowAttachSelf=true JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-25.jdk/Contents/Home mvn -DskipTests test-compile
 ```
 
-## Runtime Data
+## Database
 
-The backend uses local H2 storage at:
+The backend uses PostgreSQL for local and production-like development. Copy `.env.example` to `.env`, adjust values if needed, then start Postgres with Docker Compose:
 
-```text
-backend/app/data/
+```bash
+cp .env.example .env
+docker compose up -d postgres
 ```
 
-That folder is ignored by Git because it contains local runtime data.
+Schema migrations are managed by Flyway under `backend/app/src/main/resources/db/migration/`.

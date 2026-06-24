@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: poop-vibe-postgres
+    environment:
+      POSTGRES_DB: poop_vibes
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "54330:5432"
+    volumes:
+      - poop-vibe-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  poop-vibe-postgres-data:
