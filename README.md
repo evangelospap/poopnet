@@ -50,7 +50,7 @@ npm run dev:all
 
 This starts:
 
-- Frontend: `http://localhost:3001`
+- Frontend: `http://localhost:3999` or default port
 - Backend: `http://localhost:8080`
 - Actuator health: `http://localhost:8080/actuator/health`
 
@@ -69,6 +69,8 @@ To use another frontend port:
 ```bash
 FRONTEND_PORT=3002 npm run dev
 ```
+
+`npm run dev` also reads `FRONTEND_PORT` from `.env` and `.env.local`.
 
 Backend only:
 
