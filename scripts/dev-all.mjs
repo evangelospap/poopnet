@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 
-const isWindows = process.app === "win32";
+const isWindows = process.platform === "win32";
 let isShuttingDown = false;
 
 const processes = [
@@ -72,7 +72,11 @@ function shutdown(exitCode = 0) {
   isShuttingDown = true;
 
   for (const child of processes) {
-    if (isWindows && child.pid) {
+    if (child.exitCode !== null || child.signalCode !== null || !child.pid) {
+      continue;
+    }
+
+    if (isWindows) {
       spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
         stdio: "ignore",
         windowsHide: true,

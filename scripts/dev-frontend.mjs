@@ -1,18 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { resolve } from "node:path";
 import { spawn } from "node:child_process";
 
 const defaultPort = "3001";
 const envFromFiles = loadEnvFiles([".env", ".env.local"]);
 const env = { ...envFromFiles, ...process.env };
 const frontendPort = env.FRONTEND_PORT || defaultPort;
-const nextBin = join(
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "next.cmd" : "next",
-);
+const nextCli = resolve("node_modules", "next", "dist", "bin", "next");
 
-const child = spawn(nextBin, ["dev", "-p", frontendPort], {
+const child = spawn(process.execPath, [nextCli, "dev", "-p", frontendPort], {
   env,
   stdio: "inherit",
   windowsHide: true,
