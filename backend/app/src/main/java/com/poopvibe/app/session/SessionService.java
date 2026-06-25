@@ -4,6 +4,7 @@ import com.poopvibe.app.activity.ActivityLogService;
 import com.poopvibe.app.activity.ActivityType;
 import com.poopvibe.app.common.BusinessRuleException;
 import com.poopvibe.app.common.ResourceNotFoundException;
+import com.poopvibe.app.notification.NotificationService;
 import com.poopvibe.app.session.SessionDtos.AddCommentRequest;
 import com.poopvibe.app.session.SessionDtos.AddMediaRequest;
 import com.poopvibe.app.session.SessionDtos.AddReactionRequest;
@@ -33,6 +34,7 @@ public class SessionService {
     private final SessionMediaRepository mediaRepository;
     private final UserService userService;
     private final ActivityLogService activityLogService;
+    private final NotificationService notificationService;
     private final Counter sessionCreatedCounter;
 
     /**
@@ -44,6 +46,7 @@ public class SessionService {
      * @param mediaRepository media repository
      * @param userService user lookup service
      * @param activityLogService activity logger
+     * @param notificationService push notification fanout service
      * @param meterRegistry registry used for session counters
      */
     public SessionService(
@@ -53,6 +56,7 @@ public class SessionService {
             SessionMediaRepository mediaRepository,
             UserService userService,
             ActivityLogService activityLogService,
+            NotificationService notificationService,
             MeterRegistry meterRegistry
     ) {
         this.sessionRepository = sessionRepository;
@@ -61,6 +65,7 @@ public class SessionService {
         this.mediaRepository = mediaRepository;
         this.userService = userService;
         this.activityLogService = activityLogService;
+        this.notificationService = notificationService;
         this.sessionCreatedCounter = Counter.builder("poop_vibe_sessions_created_total")
                 .description("Total sessions created or synced through the API")
                 .register(meterRegistry);
@@ -77,34 +82,38 @@ public class SessionService {
         validateTimes(request.startTime(), request.endTime());
         User user = userService.findEntity(request.userId());
         UUID clientId = request.clientId() == null ? UUID.randomUUID() : request.clientId();
-        PoopSession session = sessionRepository.findByClientId(clientId)
-                .map(existing -> {
-                    existing.applyUpdate(
-                            request.startTime(),
-                            request.endTime(),
-                            request.mood(),
-                            request.comfortLevel(),
-                            request.privacy(),
-                            request.note(),
-                            request.syncedFromOffline()
-                    );
-                    return existing;
-                })
-                .orElseGet(() -> new PoopSession(
-                        clientId,
-                        user,
-                        request.startTime(),
-                        request.endTime(),
-                        request.mood(),
-                        request.comfortLevel(),
-                        request.privacy(),
-                        request.note(),
-                        request.syncedFromOffline()
-                ));
+        PoopSession existing = sessionRepository.findByClientId(clientId).orElse(null);
+        boolean newlyCreated = existing == null;
+        PoopSession session;
+        if (newlyCreated) {
+            session = new PoopSession(
+                    clientId,
+                    user,
+                    request.startTime(),
+                    request.endTime(),
+                    request.mood(),
+                    request.comfortLevel(),
+                    request.privacy(),
+                    request.note(),
+                    request.syncedFromOffline()
+            );
+        } else {
+            existing.applyUpdate(
+                    request.startTime(),
+                    request.endTime(),
+                    request.mood(),
+                    request.comfortLevel(),
+                    request.privacy(),
+                    request.note(),
+                    request.syncedFromOffline()
+            );
+            session = existing;
+        }
 
         PoopSession saved = sessionRepository.save(session);
         sessionCreatedCounter.increment();
         activityLogService.recordActivity(user.getId(), ActivityType.SESSION_CREATED, "session", saved.getId(), saved.getMood().name());
+        notificationService.notifyFriendsSessionFinished(saved, newlyCreated);
         return toResponse(saved);
     }
 

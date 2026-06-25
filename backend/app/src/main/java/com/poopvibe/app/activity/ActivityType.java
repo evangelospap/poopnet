@@ -14,5 +14,8 @@ public enum ActivityType {
     SESSION_DELETED,
     REACTION_ADDED,
     COMMENT_ADDED,
-    MEDIA_ADDED
+    MEDIA_ADDED,
+    PUSH_SENT,
+    PUSH_FAILED,
+    PUSH_SKIPPED
 }
