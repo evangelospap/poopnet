@@ -8,7 +8,7 @@ Poop Vibe is a playful social wellness app for logging bathroom sessions, tracki
 - Tracks personal stats such as streaks, average duration, daily trends, mood breakdowns, and comfort trends.
 - Shows a privacy-aware feed so users can share public or friends-only activity while keeping sensitive details hidden.
 - Manages friend requests, accepted friendships, friend suggestions, and lightweight social reactions.
-- Registers devices and push-token preferences for PWA notification flows.
+- Registers browser Web Push subscriptions for PWA notification flows.
 - Records activity events for operational visibility through backend activity logs and actuator metrics.
 
 ## Project Shape
@@ -101,3 +101,9 @@ docker compose up -d postgres
 ```
 
 Schema migrations are managed by Flyway under `backend/app/src/main/resources/db/migration/`.
+
+## Web Push POC
+
+The POC uses the standard Web Push API with VAPID keys, not Firebase. The backend generates an in-memory development VAPID key pair when `APP_PUSH_PUBLIC_KEY` and `APP_PUSH_PRIVATE_KEY` are not configured. Production-like environments should set both values so browser subscriptions survive backend restarts.
+
+The frontend calls the backend at `NEXT_PUBLIC_API_BASE_URL` and defaults to `http://localhost:8080`. For local testing, open two browser profiles, choose different demo users in the dashboard header, enable the bell for the receiving user, then finish a session as the other user.
