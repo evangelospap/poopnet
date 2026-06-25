@@ -1,23 +1,31 @@
-import type { Dispatch, SetStateAction } from "react";
 import Link from "next/link";
 
+import type { DemoUser } from "../api/poopVibeApi";
 import type { DashboardTheme } from "../theme";
 import type { ThemeMode } from "../types";
 
 type AppHeaderProps = {
+  demoUsers: DemoUser[];
   isDark: boolean;
   pushEnabled: boolean;
-  setPushEnabled: Dispatch<SetStateAction<boolean>>;
-  setThemeMode: Dispatch<SetStateAction<ThemeMode>>;
+  pushBusy: boolean;
+  selectedUser: DemoUser;
+  setSelectedUserId: (userId: number) => void;
+  setThemeMode: (updater: (current: ThemeMode) => ThemeMode) => void;
   theme: DashboardTheme;
+  togglePush: () => void;
 };
 
 export function AppHeader({
+  demoUsers,
   isDark,
   pushEnabled,
-  setPushEnabled,
+  pushBusy,
+  selectedUser,
+  setSelectedUserId,
   setThemeMode,
   theme,
+  togglePush,
 }: AppHeaderProps) {
   return (
     <header
@@ -34,6 +42,18 @@ export function AppHeader({
         </div>
 
         <div className="flex items-center gap-2">
+          <select
+            aria-label="Demo identity"
+            className={`h-10 rounded-lg border px-2 text-xs font-black outline-none transition ${theme.avatar}`}
+            value={selectedUser.id}
+            onChange={(event) => setSelectedUserId(Number(event.target.value))}
+          >
+            {demoUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.label}
+              </option>
+            ))}
+          </select>
           <button
             className={`grid size-10 place-items-center rounded-lg text-lg transition active:scale-95 ${
               isDark
@@ -51,9 +71,10 @@ export function AppHeader({
           </button>
           <button
             className={`relative grid size-10 place-items-center rounded-lg text-xl transition active:scale-95 ${theme.navText}`}
-            aria-label="Toggle push notifications"
+            aria-label={pushEnabled ? "Disable push notifications" : "Enable push notifications"}
+            disabled={pushBusy}
             type="button"
-            onClick={() => setPushEnabled((current) => !current)}
+            onClick={togglePush}
           >
             🔔
             {pushEnabled ? (
@@ -69,7 +90,7 @@ export function AppHeader({
             className={`grid size-9 place-items-center overflow-hidden rounded-lg border text-xs font-black transition active:scale-95 ${theme.avatar}`}
             aria-label="Open profile"
           >
-            EP
+            {selectedUser.initials}
           </Link>
         </div>
       </div>

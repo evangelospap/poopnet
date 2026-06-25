@@ -8,8 +8,11 @@ type SessionCardProps = {
   elapsed: number;
   isDark: boolean;
   isRunning: boolean;
+  isSubmitting: boolean;
   mood: Mood;
-  setIsRunning: Dispatch<SetStateAction<boolean>>;
+  onToggleSession: () => void;
+  pushMessage: string;
+  sessionMessage: string;
   setMood: Dispatch<SetStateAction<Mood>>;
   theme: DashboardTheme;
 };
@@ -18,8 +21,11 @@ export function SessionCard({
   elapsed,
   isDark,
   isRunning,
+  isSubmitting,
   mood,
-  setIsRunning,
+  onToggleSession,
+  pushMessage,
+  sessionMessage,
   setMood,
   theme,
 }: SessionCardProps) {
@@ -34,7 +40,8 @@ export function SessionCard({
 
         <button
           type="button"
-          onClick={() => setIsRunning((current) => !current)}
+          onClick={onToggleSession}
+          disabled={isSubmitting}
           className={`mt-8 grid size-48 place-items-center rounded-full border-4 text-center transition active:scale-[0.98] ${theme.timerShell}`}
           aria-label={isRunning ? "Finish session" : "Start session"}
         >
@@ -45,7 +52,7 @@ export function SessionCard({
                 : "bg-[#012d1d] text-white shadow-black/10"
             }`}
           >
-            {isRunning ? "🚽" : "💩"}
+            {isSubmitting ? "…" : isRunning ? "🚽" : "💩"}
           </span>
         </button>
 
@@ -79,8 +86,13 @@ export function SessionCard({
         >
           Feeling {mood} 🍃
         </button>
+
+        {sessionMessage || pushMessage ? (
+          <p className={`mt-4 text-sm font-bold ${theme.muted}`}>
+            {sessionMessage || pushMessage}
+          </p>
+        ) : null}
       </div>
     </section>
   );
 }
-

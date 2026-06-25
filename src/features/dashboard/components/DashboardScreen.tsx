@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { createFinishedSession } from "../api/poopVibeApi";
 import type { Mood } from "../types";
 import { AppScreenFrame } from "./AppScreenFrame";
 import { FeedSection } from "./FeedSection";
@@ -15,6 +16,9 @@ export function DashboardScreen() {
   const [elapsed, setElapsed] = useState(0);
   const [reactions, setReactions] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
+  const [sessionStartedAt, setSessionStartedAt] = useState<Date | null>(null);
+  const [sessionMessage, setSessionMessage] = useState("");
+  const [isSubmittingSession, setIsSubmittingSession] = useState(false);
 
   useEffect(() => {
     if (!isRunning) {
@@ -28,9 +32,36 @@ export function DashboardScreen() {
     return () => window.clearInterval(interval);
   }, [isRunning]);
 
+  async function toggleSession(userId: number) {
+    setSessionMessage("");
+
+    if (!isRunning) {
+      setSessionStartedAt(new Date());
+      setElapsed(0);
+      setIsRunning(true);
+      return;
+    }
+
+    const finishedAt = new Date();
+    const startedAt =
+      sessionStartedAt || new Date(finishedAt.getTime() - Math.max(elapsed, 1) * 1000);
+
+    setIsSubmittingSession(true);
+    try {
+      await createFinishedSession(userId, mood, startedAt, finishedAt);
+      setIsRunning(false);
+      setSessionStartedAt(null);
+      setSessionMessage("Vibe logged and friends notified.");
+    } catch (error) {
+      setSessionMessage(error instanceof Error ? error.message : "Could not log session.");
+    } finally {
+      setIsSubmittingSession(false);
+    }
+  }
+
   return (
     <AppScreenFrame activeHref="/">
-      {({ isDark, pushEnabled, theme }) => (
+      {({ isDark, pushEnabled, pushMessage, selectedUser, theme }) => (
         <>
           <StatusChips
             isDark={isDark}
@@ -41,8 +72,11 @@ export function DashboardScreen() {
             elapsed={elapsed}
             isDark={isDark}
             isRunning={isRunning}
+            isSubmitting={isSubmittingSession}
             mood={mood}
-            setIsRunning={setIsRunning}
+            onToggleSession={() => toggleSession(selectedUser.id)}
+            pushMessage={pushMessage}
+            sessionMessage={sessionMessage}
             setMood={setMood}
             theme={theme}
           />
