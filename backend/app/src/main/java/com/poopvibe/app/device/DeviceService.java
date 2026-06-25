@@ -6,13 +6,14 @@ import com.poopvibe.app.device.DeviceDtos.DeviceResponse;
 import com.poopvibe.app.device.DeviceDtos.RegisterDeviceRequest;
 import com.poopvibe.app.user.User;
 import com.poopvibe.app.user.UserService;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Handles idempotent device and push-token registration.
+ * Handles idempotent browser push subscription registration.
  */
 @Service
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class DeviceService {
     private final ActivityLogService activityLogService;
 
     /**
-     * Registers a device token or refreshes the existing token row.
+     * Registers a browser subscription or refreshes the existing endpoint row.
      *
      * @param request device registration request
      * @return registered or refreshed device
@@ -30,12 +31,26 @@ public class DeviceService {
     @Transactional
     public DeviceResponse register(RegisterDeviceRequest request) {
         User user = userService.findEntity(request.userId());
-        Device device = repository.findByFcmToken(request.fcmToken())
+        Device device = repository.findByEndpoint(request.endpoint())
                 .map(existing -> {
-                    existing.refresh(request.app(), request.pushEnabled());
+                    existing.refresh(
+                            request.keys().p256dh(),
+                            request.keys().auth(),
+                            request.app(),
+                            request.userAgent(),
+                            request.pushEnabled()
+                    );
                     return existing;
                 })
-                .orElseGet(() -> new Device(user, request.fcmToken(), request.app(), request.pushEnabled()));
+                .orElseGet(() -> new Device(
+                        user,
+                        request.endpoint(),
+                        request.keys().p256dh(),
+                        request.keys().auth(),
+                        request.app(),
+                        request.userAgent(),
+                        request.pushEnabled()
+                ));
         Device saved = repository.save(device);
         activityLogService.recordActivity(user.getId(), ActivityType.DEVICE_REGISTERED, "device", saved.getId(), saved.getapp().name());
         return DeviceResponse.from(saved);
@@ -51,5 +66,46 @@ public class DeviceService {
     public List<DeviceResponse> listForUser(Long userId) {
         userService.findEntity(userId);
         return repository.findByUserId(userId).stream().map(DeviceResponse::from).toList();
+    }
+
+    /**
+     * Lists enabled browser push subscriptions for notification fanout.
+     *
+     * @param userIds candidate recipient user identifiers
+     * @return enabled devices for those users
+     */
+    @Transactional(readOnly = true)
+    public List<Device> enabledDevicesForUsers(Collection<Long> userIds) {
+        if (userIds.isEmpty()) {
+            return List.of();
+        }
+        return repository.findByUserIdInAndPushEnabledTrue(userIds);
+    }
+
+    /**
+     * Marks a push subscription as successfully delivered.
+     *
+     * @param device delivery target
+     */
+    @Transactional
+    public void recordPushSuccess(Device device) {
+        Device managed = repository.findById(device.getId()).orElse(device);
+        managed.markPushSuccess();
+    }
+
+    /**
+     * Marks a push subscription as failed and optionally disables expired endpoints.
+     *
+     * @param device delivery target
+     * @param reason failure summary
+     * @param disable whether the endpoint should be disabled
+     */
+    @Transactional
+    public void recordPushFailure(Device device, String reason, boolean disable) {
+        Device managed = repository.findById(device.getId()).orElse(device);
+        managed.markPushFailure(reason);
+        if (disable) {
+            managed.disablePush();
+        }
     }
 }

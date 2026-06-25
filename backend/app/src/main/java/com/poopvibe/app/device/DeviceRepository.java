@@ -1,5 +1,6 @@
 package com.poopvibe.app.device;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,12 +11,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     /**
-     * Finds a device by push token for idempotent registration.
+     * Finds a device by browser push endpoint for idempotent registration.
      *
-     * @param fcmToken FCM token supplied by the client
-     * @return matching device, or empty when the token is new
+     * @param endpoint browser push endpoint supplied by the client
+     * @return matching device, or empty when the endpoint is new
      */
-    Optional<Device> findByFcmToken(String fcmToken);
+    Optional<Device> findByEndpoint(String endpoint);
 
     /**
      * Lists devices owned by a user.
@@ -24,4 +25,12 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
      * @return user's registered devices
      */
     List<Device> findByUserId(Long userId);
+
+    /**
+     * Lists enabled push subscriptions for a set of users.
+     *
+     * @param userIds recipient user identifiers
+     * @return enabled devices owned by the requested users
+     */
+    List<Device> findByUserIdInAndPushEnabledTrue(Collection<Long> userIds);
 }
